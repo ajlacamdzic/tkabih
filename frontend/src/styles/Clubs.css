@@ -1,0 +1,86 @@
+.clubs-container {
+  padding: 20px;
+}
+
+.clubs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-club-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-club-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.clubs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.clubs-table th,
+.clubs-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.clubs-table th {
+  background-color: #f3f4f6;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+}
+
+.modal-title {
+  text-align: center !important;
+  margin-bottom: 1rem !important;
+}
+
+.modal-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.form-message {
+  margin-top: 10px;
+  color: green;
+}

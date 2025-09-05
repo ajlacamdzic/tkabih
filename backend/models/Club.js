@@ -1,35 +1,14 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const clubSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  president: {
-    type: String,
-    required: true
-  },
-  city: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  joinedDate: {
-    type: Date,
-    required: true
-  },
-  activeMembers: {
-    type: Number,
-    default: 0
-  }
-});
+const ClubSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  president: { type: String, required: true },
+  city: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  
+  dateJoined: { type: Date, required: true },
+  
+}, { timestamps: true });
 
-export default mongoose.model('Club', clubSchema);
+export default mongoose.model("Club", ClubSchema);

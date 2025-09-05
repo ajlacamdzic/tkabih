@@ -1,134 +1,77 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import '../styles/Clubs.css';
-import ClubModal from '../components/ClubModal';
+import { useState } from "react";
+import axios from "axios";
+import "../styles/Clubs.css";
 
-export default function Clubs() {
-  const [clubs, setClubs] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [president, setPresident] = useState('');
-  const [address, setAddress] = useState('');
-  const [activeMembers, setActiveMembers] = useState('');
-  const [joinedDate, setJoinedDate] = useState('');
-  const [message, setMessage] = useState('');
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  useEffect(() => {
-    fetchClubs();
-  }, []);
+export default function ClubForm({ onClose, onClubAdded }) {
+  const [form, setForm] = useState({
+    name: "",
+    president: "",
+    city: "",
+    email: "",
+    dateJoined: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const fetchClubs = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/clubs');
-      setClubs(res.data);
-    } catch (err) {
-      console.error('Greška pri dohvaćanju klubova:', err);
-    }
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleAddClub = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSaving(true);
     try {
-      const newClub = {
-        name,
-        president,
-        address,
-        activeMembers: Number(activeMembers),
-        joinedDate: joinedDate ? new Date(joinedDate) : new Date(),
-      };
-      const res = await axios.post('http://localhost:5000/api/clubs', newClub);
-      setMessage(res.data.message);
-      setShowModal(false);
-      fetchClubs(); // Refresh list
-      // Reset form
-      setName('');
-      setPresident('');
-      setAddress('');
-      setActiveMembers('');
-      setJoinedDate('');
+      const res = await axios.post(`${API_BASE}/api/clubs`, form);
+      onClubAdded(res.data.club); 
     } catch (err) {
-      console.error('Greška pri dodavanju:', err);
-      setMessage('Greška pri dodavanju kluba.');
+      setError("Greška pri spremanju. Provjerite podatke ili server.");
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="clubs-container">
-      <div className="clubs-header">
-        <h1>Klubovi</h1>
-        <button onClick={() => setShowModal(true)} className="add-club-btn">
-          Dodaj klub
-        </button>
+    <form className="form-grid" onSubmit={submit}>
+      <div className="form-field">
+        <label>Naziv kluba</label>
+        <input name="name" value={form.name} onChange={onChange} required />
       </div>
 
-      <table className="clubs-table">
-        <thead>
-          <tr>
-            <th>Naziv kluba</th>
-            <th>Predsjednik</th>
-            <th>Adresa</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clubs.map((club, index) => (
-            <tr key={index}>
-              <td>{club.name}</td>
-              <td>{club.president}</td>
-              <td>{club.address}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="form-field">
+        <label>Predsjednik</label>
+        <input name="president" value={form.president} onChange={onChange} required />
+      </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Dodaj novi klub</h2>
-            <form onSubmit={handleAddClub} className="modal-form">
-              <input
-                type="text"
-                placeholder="Naziv kluba"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Predsjednik"
-                value={president}
-                onChange={(e) => setPresident(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Adresa"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-              <input
-                type="number"
-                placeholder="Broj aktivnih članova"
-                value={activeMembers}
-                onChange={(e) => setActiveMembers(e.target.value)}
-              />
-              <input
-                type="date"
-                placeholder="Datum pristupa"
-                value={joinedDate}
-                onChange={(e) => setJoinedDate(e.target.value)}
-              />
-              <div className="modal-buttons">
-                <button type="submit">Spremi</button>
-                <button type="button" onClick={() => setShowModal(false)}>
-                  Otkaži
-                </button>
-              </div>
-              {message && <p className="form-message">{message}</p>}
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+      <div className="form-field">
+        <label>Adresa</label>
+        <input name="city" value={form.city} onChange={onChange} required />
+      </div>
+
+      <div className="form-field">
+        <label>Email</label>
+        <input type="email" name="email" value={form.email} onChange={onChange} required />
+      </div>
+
+      <div className="form-field">
+        <label>Datum pristupa asocijaciji</label>
+        <input type="date" name="dateJoined" value={form.dateJoined} onChange={onChange} required />
+      </div>
+
+      {error && <div className="form-error">{error}</div>}
+
+      <div className="form-actions">
+        <button type="submit" className="btn-primary" disabled={saving}>
+          {saving ? "Spremanje…" : "Spremi klub"}
+        </button>
+        <button type="button" className="btn-secondary" onClick={onClose}>
+          Otkaži
+        </button>
+      </div>
+      </form>
   );
 }

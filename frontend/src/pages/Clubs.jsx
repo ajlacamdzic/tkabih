@@ -1,61 +1,72 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import ClubModal from '../components/ClubModal';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import ClubModal from "../components/ClubModal";
+import "../styles/Clubs.css";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Clubs() {
   const [clubs, setClubs] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchClubs = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/clubs`);
+      setClubs(res.data || []);
+    } catch (err) {
+      console.error("Greška pri dohvaćanju klubova:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchClubs();
   }, []);
 
-  const fetchClubs = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/clubs');
-      setClubs(res.data);
-    } catch (err) {
-      console.error('Greška pri dohvaćanju klubova:', err);
-    }
-  };
-
   return (
-    <div className="clubs-container p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Klubovi</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
+    <div className="clubs-page">
+      <div className="clubs-header">
+        <h1>Klubovi</h1>
+        <button className="btn-primary" onClick={() => setShowModal(true)}>
           Dodaj klub
         </button>
       </div>
 
-      <table className="min-w-full border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2">Naziv kluba</th>
-            <th className="border px-4 py-2">Predsjednik</th>
-            <th className="border px-4 py-2">Grad</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clubs.map((club, index) => (
-            <tr key={index}>
-              <td className="border px-4 py-2">{club.name}</td>
-              <td className="border px-4 py-2">{club.president}</td>
-              <td className="border px-4 py-2">{club.city}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="card">
+        {loading ? (
+          <div className="empty">Učitavanje…</div>
+        ) : clubs.length === 0 ? (
+          <div className="empty">Još nema unesenih klubova.</div>
+        ) : (
+          <table className="clubs-table">
+            <thead>
+              <tr>
+                <th>Naziv kluba</th>
+                <th>Predsjednik</th>
+                <th>Adresa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clubs.map((c) => (
+                <tr key={c._id}>
+                  <td>{c.name}</td>
+                  <td>{c.president}</td>
+                  <td>{c.city}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       <ClubModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onClubAdded={() => {
+        onClubAdded={(newClub) => {
+          setClubs((prev) => [...prev, newClub]);
           setShowModal(false);
-          fetchClubs();
         }}
       />
     </div>

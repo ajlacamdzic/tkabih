@@ -7,6 +7,9 @@ import jwt from 'jsonwebtoken';
 import User from './models/User.js';
 import Club from './models/Club.js'; 
 import clubRoutes from './routes/clubs.js';
+import eventRoutes from "./routes/events.js";
+import authRoutes from './routes/authRoutes.js'
+import membersRoutes from "./routes/members.js";
 
 
 dotenv.config();
@@ -30,12 +33,18 @@ app.post('/api/auth/login', async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: 'Pogrešan email ili lozinka' });
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: user.role, club: user.club }, // club mora biti tu!
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    res.json({ token, email: user.email, role: user.role });
+    // Dodaj club u odgovor!
+    res.json({ 
+      token, 
+      email: user.email, 
+      role: user.role, 
+      club: user.club 
+    });
   } catch (error) {
     res.status(500).json({ message: 'Greška na serveru' });
   }
@@ -44,11 +53,20 @@ app.post('/api/auth/login', async (req, res) => {
 // DODAVANJE KLUBA
 app.post('/api/clubs', async (req, res) => {
   try {
-    const { name, president, membersCount } = req.body;
-    const club = new Club({ name, president, membersCount });
+    const { name, president, city, email, dateJoined } = req.body;
+
+    const club = new Club({
+      name,
+      president,
+      city,
+      email,
+      dateJoined
+    });
+
     await club.save();
-    res.status(201).json({ message: 'Klub uspješno dodan!' });
+    res.status(201).json({ club });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Greška prilikom dodavanja kluba.' });
   }
 });
@@ -63,8 +81,11 @@ app.get('/api/clubs', async (req, res) => {
   }
 });
 
-
 app.use('/api/clubs', clubRoutes);
+app.use("/api/events", eventRoutes);
+app.use('/api/auth', authRoutes);
+app.use("/api/members", membersRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
